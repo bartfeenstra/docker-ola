@@ -3,6 +3,9 @@
 
 cd `dirname "$0"`/..
 
+# Exit on errors
+trap 'exit $?' ERR
+
 if [ "$#" -ne 1 ]
 then
   echo "This command takes a single argument, which is the version to release."
@@ -19,15 +22,13 @@ if [[ ! $VERSION =~ ^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$ ]]; then
 fi
 
 # Check this version does not already exist.
-git tag | grep -q ^$VERSION$
-if [ $? -eq 0 ]; then
+if git tag | grep -q ^$VERSION$; then
     echo "Version $VERSION already exists."
     exit 1
 fi
 
 # Check there are no uncommitted changes.
-git diff-index --quiet HEAD --
-if [ $? -ne 0 ]; then
+if ! git diff-index --quiet HEAD --; then
     echo 'The Git repository has uncommitted changes.'
     exit 1
 fi
