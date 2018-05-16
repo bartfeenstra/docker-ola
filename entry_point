@@ -1,0 +1,6 @@
+#!/use/bin/env bash
+
+# Exit on errors.
+trap 'exit $?' ERR
+
+olad -c /etc/ola

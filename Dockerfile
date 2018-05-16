@@ -10,6 +10,8 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get clean \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 
+COPY ./entry_point /entry_point
+RUN chmod u+rx /entry_point
 COPY ./ftdi.rules /etc/udev/rules.d/ftdi.rules
 
 RUN service olad start && sleep 1 \
@@ -18,6 +20,6 @@ RUN service olad start && sleep 1 \
 
 USER olad
 
-ENTRYPOINT ["olad", "-c", "/etc/ola"]
+ENTRYPOINT ["bash", "/entry_point"]
 
 EXPOSE 9010 9090

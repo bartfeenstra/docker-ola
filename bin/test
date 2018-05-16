@@ -5,15 +5,23 @@ cd `dirname "$0"`/..
 # Exit on errors
 trap 'exit $?' ERR
 
+CONTAINER_NAME=bartfeenstra_ola_test
+
+function stop_container {
+    docker stop $CONTAINER_NAME || true
+    docker container rm $CONTAINER_NAME || true
+}
+
+# Stop a possibly left-over container.
+stop_container
+
 # Run a container specifically for this test.
 ./bin/build test
-container_name=bartfeenstra_ola_test
-docker run -d --name $container_name bartfeenstra/ola:test
-container_ip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name`
+docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test
+container_ip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
 
 # Connect to OLA.
 ./bin/wait-for-it $container_ip:9090
 curl --verbose -f http://$container_ip:9090 > /dev/null
 
-docker stop $container_name
-docker container rm $container_name
+stop_container
