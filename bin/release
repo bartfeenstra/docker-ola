@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
-
 cd `dirname "$0"`/..
+
+. ./bin/.common
 
 # Exit on errors
 trap 'exit $?' ERR
@@ -16,10 +17,7 @@ VERSION=$1
 BRANCH=release-$VERSION
 
 # Check we are releasing a valid Semantic Version.
-if [[ ! $VERSION =~ ^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$ ]]; then
-    echo "$VERSION is not a valid Semantic Version (x.y.z). See https://semver.org/."
-    exit 1
-fi
+validate_semver $VERSION
 
 # Check this version does not already exist.
 if git tag | grep -q ^$VERSION$; then
@@ -34,26 +32,14 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 # Build and test the image.
-./bin/build
+./bin/build $VERSION
 ./bin/test
 
-# Create the release branch.
-git checkout -b $BRANCH
-
-# Commit the release to Git.
-echo $VERSION > VERSION
-git add VERSION
-git commit -m "Release version $VERSION."
+# Push the release to Git.
 git tag $VERSION
+git push origin $VERSION
 
 # Publish the image.
-docker push bartfeenstra/ola:$VERSION
-
-# Revert back to a development state.
-git revert --no-edit HEAD
-
-# Push changes.
-git push --set-upstream origin $BRANCH
-git push --tags
-
-echo "Finalize the $VERSION release by approving and merging its pull request at https://github.com/bartfeenstra/docker-ola/compare/release-$VERSION?expand=1"
+for tag in `version_tags $VERSION`; do
+    docker push $tag
+done
