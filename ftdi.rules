@@ -1,0 +1,2 @@
+# udev rules for FTDI devices.
+SUBSYSTEM=="usb|usb_device", ACTION=="add", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", GROUP="plugdev"
