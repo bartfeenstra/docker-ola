@@ -2,8 +2,11 @@
 
 cd `dirname "$0"`/..
 
+. ./bin/.common
+
+version=$1
+
 # Exit on errors
-exit_code=0
 trap 'exit $?' ERR
 
 # Set up wait-for-it.
@@ -12,15 +15,13 @@ if [ ! -f ./bin/wait-for-it ]; then
     chmod ugo+rx ./bin/wait-for-it
 fi
 
-docker build -t bartfeenstra/ola .
-
-# Stop aggregating build step exit codes.
-trap - ERR
-
-if [ $exit_code -eq 0 ]
-then
-    echo "SUCCESS: ALL BUILD STEPS PASSED."
-else
-    echo "ERROR: SOME BUILD STEPS FAILED."
+tag_arg=
+if [ ! -z $version ]; then
+    if [ ! $version = test ]; then
+        validate_semver $version
+    fi
+    for tag in `version_tags $version`; do
+        tag_arg="$tag_arg -t $tag"
+    done
 fi
-exit $exit_code
+docker build $tag_arg .

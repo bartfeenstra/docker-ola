@@ -2,29 +2,18 @@
 
 cd `dirname "$0"`/..
 
-# Aggregate test exit codes.
-exit_code=0
-trap '(( exit_code |= $? ))' ERR
+# Exit on errors
+trap 'exit $?' ERR
 
 # Run a container specifically for this test.
+./bin/build test
 container_name=bartfeenstra_ola_test
-docker run -d --name $container_name bartfeenstra/ola
+docker run -d --name $container_name bartfeenstra/ola:test
 container_ip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name`
 
 # Connect to OLA.
 ./bin/wait-for-it $container_ip:9090
 curl --verbose -f http://$container_ip:9090 > /dev/null
 
-# Stop aggregating test exit codes.
-trap - ERR
-
 docker stop $container_name
 docker container rm $container_name
-
-if [ $exit_code -eq 0 ]
-then
-    echo "SUCCESS: ALL TESTS PASSED."
-else
-    echo "ERROR: SOME TESTS FAILED."
-fi
-exit $exit_code
