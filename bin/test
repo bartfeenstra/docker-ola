@@ -15,13 +15,18 @@ function stop_container {
 # Stop a possibly left-over container.
 stop_container
 
-# Run a container specifically for this test.
+# Build a container specifically for this test.
 ./bin/build test
+
+# Connect to the web UI.
 docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test
 container_ip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
-
-# Connect to OLA.
 ./bin/wait-for-it $container_ip:9090
 curl --verbose -f http://$container_ip:9090 > /dev/null
+stop_container
 
+# Test plugin configuration.
+# @todo Finish this.
+docker run -d --name $CONTAINER_NAME --env OLA_PLUGIN_SANDNET=1 bartfeenstra/ola:test
+docker logs $CONTAINER_NAME
 stop_container
