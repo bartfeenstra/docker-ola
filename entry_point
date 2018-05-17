@@ -25,8 +25,6 @@ PLUGINS="1:DUMMY
 20:UARTDMX
 21:OPENPIXELCONTROL
 22:GPIO"
-ps aux
-netstat -l
 for plugin in $PLUGINS; do
     plugin_parts=(${plugin//\:/ })
     plugin_id=${plugin_parts[0]}
