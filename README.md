@@ -32,3 +32,10 @@ configuration for each.
 - `OLA_PLUGIN_UARTDMX` (ID: 20)
 - `OLA_PLUGIN_OPENPIXELCONTROL` (ID: 21)
 - `OLA_PLUGIN_GPIO` (ID: 22)
+
+### The Docker command
+The image's Docker command (`CMD` in Dockerfile, `COMMAND` for `docker run`) is passed on to the `olad` executable
+verbatim, and can be used to exercise full control over its behavior. Run `olad --help` to see the full list of
+available options. **DO NOT** use the `-f` flag when using the default entry point, as they are incompatible.
+Example: to change the default HTTP port from `9090` to `9091`, run
+`docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test --http-port 9091`. 
