@@ -38,4 +38,4 @@ The image's Docker command (`CMD` in Dockerfile, `COMMAND` for `docker run`) is 
 verbatim, and can be used to exercise full control over its behavior. Run `olad --help` to see the full list of
 available options. **DO NOT** use the `-f` flag when using the default entry point, as they are incompatible.
 Example: to change the default HTTP port from `9090` to `9091`, run
-`docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test --http-port 9091`. 
+`docker run -d --name $CONTAINER_NAME bartfeenstra/ola --http-port 9091`.
