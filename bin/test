@@ -2,44 +2,35 @@
 
 cd `dirname "$0"`/..
 
-# Exit on errors
-trap 'stop_container; exit 1' ERR
+. ./src/bash/docker
 
-CONTAINER_NAME=bartfeenstra_ola_test
+# Aggregate test results.
+success=true
+trap 'success=false' ERR
 
-function stop_container {
-    echo "Stopping container $CONTAINER_NAME"
-    docker stop $CONTAINER_NAME || true
-    echo "Removing container $CONTAINER_NAME"
-    docker container rm $CONTAINER_NAME || true
-}
-
-function container_ip {
-    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME
-}
-
-# Stop a possibly left-over container.
-stop_container
-
-# Build a container specifically for this test.
+# Build a container specifically for the tests.
 ./bin/build test
 
-# Connect to the web UI.
-docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test
-./bin/wait-for-it `container_ip`:9090
-curl --verbose -f http://`container_ip`:9090 > /dev/null
+if $success; then
+    for test in ./tests/*; do
+        # Stop a possibly left-over container.
+        stop_container
+        echo ""
+        echo "Running test $test..."
+        echo ""
+        $test
+    done
+fi
+
+# Stop aggregating test results.
+trap - ERR
+
 stop_container
 
-# Test plugin configuration.
-docker run -d --name $CONTAINER_NAME --env OLA_PLUGIN_SANDNET=1 bartfeenstra/ola:test
-./bin/wait-for-it `container_ip`:9090
-# OLAD is ready, but it needs a moment to deploy the runtime configuration.
-sleep 3
-docker exec $CONTAINER_NAME ola_plugin_state -p 7 | grep 'Enabled: True' || ( echo 'Fail: OLA plugin was not enabled' && false )
-stop_container
-
-# Test using a custom entrypoint.
-docker run -d --name $CONTAINER_NAME --entrypoint olad bartfeenstra/ola:test --http-port 9091
-docker logs $CONTAINER_NAME
-./bin/wait-for-it `container_ip`:9091
-stop_container
+if $success; then
+    echo "SUCCESS: ALL TESTS PASSED."
+    exit
+else
+    echo "ERROR: SOME TESTS FAILED."
+    exit 1
+fi

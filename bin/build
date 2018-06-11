@@ -2,7 +2,7 @@
 
 cd `dirname "$0"`/..
 
-. ./bin/.common
+. ./src/bash/version
 
 version=$1
 

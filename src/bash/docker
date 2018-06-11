@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+CONTAINER_NAME=bartfeenstra_ola_test
+
+function stop_container {
+    echo "Stopping container $CONTAINER_NAME"
+    docker stop $CONTAINER_NAME || true
+    echo "Removing container $CONTAINER_NAME"
+    docker container rm $CONTAINER_NAME || true
+}
+
+function container_ip {
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME
+}
