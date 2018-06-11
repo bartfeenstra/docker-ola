@@ -3,17 +3,37 @@
 cd `dirname "$0"`/..
 
 # Exit on errors
-trap 'exit $?' ERR
+trap 'stop_container; exit 1' ERR
 
-# Run a container specifically for this test.
+CONTAINER_NAME=bartfeenstra_ola_test
+
+function stop_container {
+    echo "Stopping container $CONTAINER_NAME"
+    docker stop $CONTAINER_NAME || true
+    echo "Removing container $CONTAINER_NAME"
+    docker container rm $CONTAINER_NAME || true
+}
+
+function container_ip {
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME
+}
+
+# Stop a possibly left-over container.
+stop_container
+
+# Build a container specifically for this test.
 ./bin/build test
-container_name=bartfeenstra_ola_test
-docker run -d --name $container_name bartfeenstra/ola:test
-container_ip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name`
 
-# Connect to OLA.
-./bin/wait-for-it $container_ip:9090
-curl --verbose -f http://$container_ip:9090 > /dev/null
+# Connect to the web UI.
+docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test
+./bin/wait-for-it `container_ip`:9090
+curl --verbose -f http://`container_ip`:9090 > /dev/null
+stop_container
 
-docker stop $container_name
-docker container rm $container_name
+# Test plugin configuration.
+docker run -d --name $CONTAINER_NAME --env OLA_PLUGIN_SANDNET=1 bartfeenstra/ola:test
+./bin/wait-for-it `container_ip`:9090
+# OLAD is ready, but it needs a moment to deploy the runtime configuration.
+sleep 3
+docker exec $CONTAINER_NAME ola_plugin_state -p 7 | grep 'Enabled: True' || ( echo 'Fail: OLA plugin was not enabled' && false )
+stop_container
