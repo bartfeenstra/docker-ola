@@ -4,15 +4,33 @@ cd `dirname "$0"`/..
 
 . ./src/bash/docker
 
-# Exit on errors
-trap 'stop_container; exit 1' ERR
+# Aggregate test results.
+success=true
+trap 'success=false' ERR
 
 # Build a container specifically for the tests.
 ./bin/build test
 
-for test in ./tests/*; do
-    # Stop a possibly left-over container.
-    stop_container
-    $test
-done
+if $success; then
+    for test in ./tests/*; do
+        # Stop a possibly left-over container.
+        stop_container
+        echo ""
+        echo "Running test $test..."
+        echo ""
+        $test
+    done
+fi
+
+# Stop aggregating test results.
+trap - ERR
+
 stop_container
+
+if $success; then
+    echo "SUCCESS: ALL TESTS PASSED."
+    exit
+else
+    echo "ERROR: SOME TESTS FAILED."
+    exit 1
+fi
