@@ -1,9 +1,18 @@
-#!/use/bin/env bash
+#!/usr/bin/env bash
 
 set -e
 set -o monitor
 
 olad &
+/wait-for-it localhost:9010
+
+function ola_enable {
+    local plugin_id=$1
+    # Enable the plugin.
+    ola_plugin_state -p $plugin_id -s enable
+    # Assert the plugin is enabled. We cannot rely on ola_plugin_state's exit code, so parse the status output instead.
+    ola_plugin_state -p $plugin_id | grep 'Enabled: True'
+}
 
 PLUGINS="1:DUMMY
 2:ARTNET
@@ -31,8 +40,9 @@ for plugin in $PLUGINS; do
     plugin_name=${plugin_parts[1]}
     env_name=OLA_PLUGIN_$plugin_name
     if [ ! -z "${!env_name}" ]; then
-        ola_plugin_state -p $plugin_id -s enabled
+        echo "Enabling OLA plugin $plugin_name ($plugin_id)..."
+        ola_enable $plugin_id
     fi
 done
 
-fg %olad
+fg
