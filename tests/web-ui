@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Connect to the web UI.
+
+set -e
+
+cd `dirname "$0"`/..
+
+. ./src/bash/docker
+
+docker run -d --name $CONTAINER_NAME bartfeenstra/ola:test
+./bin/wait-for-it `container_ip`:9090
+curl --verbose -f http://`container_ip`:9090 > /dev/null

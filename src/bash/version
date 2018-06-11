@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 function version_tags {
     version=$1
     tags=
