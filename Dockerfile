@@ -13,7 +13,7 @@ RUN apt-get update && apt-get upgrade -y \
 COPY ./entry_point /entry_point
 RUN chmod u+rx /entry_point
 COPY ./bin/wait-for-it /wait-for-it
-COPY ./ftdi.rules /etc/udev/rules.d/ftdi.rules
+COPY ./ftdi.rules /etc/udev/rules.d/10-ftdi.rules
 
 # The ola package creates an "olad" user and sets its home, but fails to create the directory.
 RUN mkdir /usr/lib/olad \
