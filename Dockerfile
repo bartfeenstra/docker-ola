@@ -18,8 +18,8 @@ COPY ./ftdi.rules /etc/udev/rules.d/ftdi.rules
 # The ola package creates an "olad" user and sets its home, but fails to create the directory.
 RUN mkdir /usr/lib/olad \
     && chown olad:olad -R /usr/lib/olad \
-    # Assign the "olad" user to "olad" group
-    && usermod -G olad olad \
+    # Assign the "olad" user to the "olad" group.
+    && usermod -aG olad olad \
     # Allow OLA to be run by anyone in the "olad" group.
     && chown root:olad /usr/bin/olad \
     && chmod ug+rwx /usr/bin/olad
