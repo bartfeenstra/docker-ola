@@ -21,8 +21,11 @@ tag_arg=
 if [ ! -z "$version" ]; then
     if [ ! "$version" = 'test' ]; then
         validate_semver "$version"
+        tags=$(version_tags "$version")
+    else
+        tags='bartfeenstra/ola:test'
     fi
-    for tag in $(version_tags "$version"); do
+    for tag in $tags; do
         tag_arg="$tag_arg -t $tag"
     done
 fi
