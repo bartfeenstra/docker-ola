@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 
 . ./src/bash/version
 
-version=$1
+version=${1:-}
 
 mkdir -p ./vendor/bin
 
