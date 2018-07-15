@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
+
+failures=false
+while read -r pattern; do
+    while read -r file; do
+        if ! shellcheck -x "$file"; then
+            failures=true
+        fi
+    done < <(find ./ 2>/dev/null | grep "$pattern")
+done << 'EOF'
+^\./bin/[^/]*$
+^\./tests/[^/]*$
+^\./src/bash/[^/]*$
+EOF
+
+if $failures; then
+    exit 1
+fi

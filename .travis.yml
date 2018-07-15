@@ -5,6 +5,11 @@ language: generic
 services:
   - docker
 
+addons:
+  apt:
+    packages:
+    - shellcheck
+
 before_script:
   - ./bin/build
 

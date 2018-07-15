@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
 function version_tags {
-    version=$1
-    tags=
-    version_parts=(${version//\./ })
-    tag_parts="${version_parts[0]} ${version_parts[0]}.${version_parts[1]} $version latest"
+    local version=$1
+    local tags=
+    local version_parts=(${version//\./ })
+    local tag_parts="${version_parts[0]} ${version_parts[0]}.${version_parts[1]} $version latest"
     for tag_part in $tag_parts; do
         tags="$tags bartfeenstra/ola:$tag_part"
     done
-    echo $tags
+    echo "$tags"
 }
 
 function validate_semver {
-    version=$1
+    local version=$1
     if [[ ! $version =~ ^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$ ]]; then
         echo "$version is not a valid Semantic Version (x.y.z). See https://semver.org/."
         exit 1

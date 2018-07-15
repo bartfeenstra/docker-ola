@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Test plugin configuration.
 
-set -e
+set -Eeuo pipefail
 
-cd `dirname "$0"`/..
+cd "$(dirname "$0")/.."
 
 . ./src/bash/docker
 
-docker run -d --name $CONTAINER_NAME --env OLA_PLUGIN_SANDNET=1 bartfeenstra/ola:test
-./bin/wait-for-it `container_ip`:9090
+docker run -d --name "$CONTAINER_NAME" --env OLA_PLUGIN_SANDNET=1 bartfeenstra/ola:test
+./vendor/bin/wait-for-it "$(container_ip):9090"
 # OLAD is ready, but it needs a moment to deploy the runtime configuration.
 sleep 3
-docker exec $CONTAINER_NAME ola_plugin_state -p 7 | grep 'Enabled: True' || ( echo 'Fail: OLA plugin was not enabled' && false )
+docker exec "$CONTAINER_NAME" ola_plugin_state -p 7 | grep 'Enabled: True' || ( echo 'Fail: OLA plugin was not enabled' && false )
