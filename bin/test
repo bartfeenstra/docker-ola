@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-cd `dirname "$0"`/..
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
 
 . ./src/bash/docker
 

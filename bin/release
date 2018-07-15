@@ -1,11 +1,10 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
-cd `dirname "$0"`/..
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
 
 . ./src/bash/version
-
-# Exit on errors
-trap 'exit $?' ERR
 
 if [ "$#" -ne 1 ]
 then
@@ -14,13 +13,12 @@ then
 fi
 
 VERSION=$1
-BRANCH=release-$VERSION
 
 # Check we are releasing a valid Semantic Version.
-validate_semver $VERSION
+validate_semver "$VERSION"
 
 # Check this version does not already exist.
-if git tag | grep -q ^$VERSION$; then
+if git tag | grep -q "^$VERSION$"; then
     echo "Version $VERSION already exists."
     exit 1
 fi
@@ -32,14 +30,14 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 # Build and test the image.
-./bin/build $VERSION
+./bin/build "$VERSION"
 ./bin/test
 
 # Push the release to Git.
-git tag $VERSION
-git push origin $VERSION
+git tag "$VERSION"
+git push origin "$VERSION"
 
 # Publish the image.
-for tag in `version_tags $VERSION`; do
-    docker push $tag
+for tag in $(version_tags "$VERSION"); do
+    docker push "$tag"
 done

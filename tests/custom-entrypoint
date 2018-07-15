@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Test using a custom entrypoint.
 
-set -e
+set -Eeuo pipefail
 
-cd `dirname "$0"`/..
+cd "$(dirname "$0")/.."
 
 . ./src/bash/docker
 
-docker run -d --name $CONTAINER_NAME --entrypoint olad bartfeenstra/ola:test --http-port 9091
-docker logs $CONTAINER_NAME
-./bin/wait-for-it `container_ip`:9091
+docker run -d --name "$CONTAINER_NAME" --entrypoint olad bartfeenstra/ola:test --http-port 9091
+./vendor/bin/wait-for-it "$(container_ip):9091"

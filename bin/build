@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
 
-cd `dirname "$0"`/..
+set -Eeuo pipefail
+
+cd "$(dirname "$0")/.."
 
 . ./src/bash/version
 
 version=$1
 
-# Exit on errors
-trap 'exit $?' ERR
+mkdir -p ./vendor/bin
 
 # Set up wait-for-it.
-if [ ! -f ./bin/wait-for-it ]; then
-    curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > ./bin/wait-for-it
-    chmod ugo+rx ./bin/wait-for-it
+if [ ! -f ./vendor/bin/wait-for-it ]; then
+    curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > ./vendor/bin/wait-for-it
 fi
 
+chmod ugo+rx ./vendor/bin/*
+
 tag_arg=
-if [ ! -z $version ]; then
-    if [ ! $version = test ]; then
-        validate_semver $version
+if [ ! -z "$version" ]; then
+    if [ ! "$version" = 'test' ]; then
+        validate_semver "$version"
     fi
-    for tag in `version_tags $version`; do
+    for tag in $(version_tags "$version"); do
         tag_arg="$tag_arg -t $tag"
     done
 fi
-docker build $tag_arg .
+eval "docker build $tag_arg ."
