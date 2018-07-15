@@ -2,10 +2,6 @@
 
 function version_tags {
     local version=$1
-    echo "$version"
-    echo "$version"
-    echo "$version"
-    exit
     local tags=
     local version_parts=(${version//\./ })
     local tag_parts="${version_parts[0]} ${version_parts[0]}.${version_parts[1]} $version latest"
