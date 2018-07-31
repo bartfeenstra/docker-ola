@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 
-set -e
-set -o monitor
+set -Eeuo monitor pipefail
 
 olad &
-/wait-for-it localhost:9010
+/ola/bin/wait-for-it localhost:9010
 
 function ola_enable {
     local plugin_id=$1
     # Enable the plugin.
-    ola_plugin_state -p $plugin_id -s enable
+    ola_plugin_state -p "$plugin_id" -s enable
     # Assert the plugin is enabled. We cannot rely on ola_plugin_state's exit code, so parse the status output instead.
-    ola_plugin_state -p $plugin_id | grep 'Enabled: True'
+    ola_plugin_state -p "$plugin_id" | grep 'Enabled: True'
 }
 
 PLUGINS="1:DUMMY
@@ -39,9 +38,9 @@ for plugin in $PLUGINS; do
     plugin_id=${plugin_parts[0]}
     plugin_name=${plugin_parts[1]}
     env_name=OLA_PLUGIN_$plugin_name
-    if [ ! -z "${!env_name}" ]; then
+    if [ ! -z "${env_name}" ]; then
         echo "Enabling OLA plugin $plugin_name ($plugin_id)..."
-        ola_enable $plugin_id
+        ola_enable "$plugin_id"
     fi
 done
 

@@ -12,6 +12,7 @@ while read -r pattern; do
         fi
     done < <(find ./ 2>/dev/null | grep "$pattern")
 done << 'EOF'
+^\./entry_point$
 ^\./bin/[^/]*$
 ^\./tests/[^/]*$
 ^\./src/bash/[^/]*$
