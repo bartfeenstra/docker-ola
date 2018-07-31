@@ -10,9 +10,10 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get clean \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 
-COPY ./entry_point /entry_point
-RUN chmod u+rx /entry_point
-COPY ./vendor/bin/wait-for-it /wait-for-it
+COPY ./entry_point /ola/bin/entry_point
+COPY ./vendor/bin/wait-for-it /ola/bin/wait-for-it
+RUN chown -R :olad /ola/bin
+RUN chmod -R ug+rx /ola/bin
 COPY ./ftdi.rules /etc/udev/rules.d/ftdi.rules
 
 # The ola package creates an "olad" user and sets its home, but fails to create the directory.
@@ -30,6 +31,6 @@ RUN olad -f && sleep 1 \
     # Disable all OLA plugins for a clean slate, without plugin conflicts.
     && bash -c 'for pid in {1..99}; do ola_plugin_state -p $pid -s disabled &>/dev/null; done'
 
-ENTRYPOINT ["/entry_point"]
+ENTRYPOINT ["/ola/bin/entry_point"]
 
 EXPOSE 9010 9090
