@@ -2,6 +2,7 @@
 
 set -E
 set -e
+set -u
 set -o monitor
 
 olad &
