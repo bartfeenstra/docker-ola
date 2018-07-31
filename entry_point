@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -o monitor
+set -Eeuo monitor pipefail
 
 olad &
 /wait-for-it localhost:9010
