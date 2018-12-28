@@ -38,7 +38,7 @@ for plugin in $PLUGINS; do
     plugin_id=${plugin_parts[0]}
     plugin_name=${plugin_parts[1]}
     env_name=OLA_PLUGIN_$plugin_name
-    if [ ! -z "${env_name}" ]; then
+    if [ ! -z "${!env_name:-}" ]; then
         echo "Enabling OLA plugin $plugin_name ($plugin_id)..."
         ola_enable "$plugin_id"
     fi
